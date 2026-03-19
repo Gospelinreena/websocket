@@ -50,7 +50,6 @@ async def server(websocket):
                         for client in connected_clients.values()
                     ]
                 )
-
 async def main():
     async with websockets.serve(server, "localhost", 8765):
         print("Server started on ws://localhost:8765")

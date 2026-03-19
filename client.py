@@ -24,4 +24,16 @@ async def client():
 
         await asyncio.gather(send(), receive())
 
+        async def receive():
+            while True:
+                try:
+                    response = await websocket.recv()
+                    print("\n" + response)
+                except websockets.exceptions.ConnectionClosed:
+                    print("Disconnected")
+
+
+
+        
+
 asyncio.run(client())
