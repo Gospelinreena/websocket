@@ -19,8 +19,7 @@ async def server(websocket):
         await asyncio.gather(
             *[
                 client.send(f"{username} joined")
-                for user, client in connected_clients.items()
-                if client != websocket
+                for client in connected_clients.values()
             ]
         )
 
@@ -30,10 +29,10 @@ async def server(websocket):
             await asyncio.gather(
                 *[
                     client.send(f"{username}: {message}")
-                    for user, client in connected_clients.items()
-                    if client != websocket
+                    for client in connected_clients.values()
                 ]
             )
+
     except websockets.exceptions.ConnectionClosed:
         print(f"{username} disconnected")
 
@@ -51,8 +50,10 @@ async def server(websocket):
                         for client in connected_clients.values()
                     ]
                 )
+
 async def main():
     async with websockets.serve(server, "localhost", 8765):
-        print("Server started")
-        await asyncio.Future()
+        print("Server started on ws://localhost:8765")
+        await asyncio.Future() 
+
 asyncio.run(main())

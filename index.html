@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat App</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #ece5dd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            margin-top: 20px;
+        }
+
+        #chat {
+            width: 400px;
+            height: 400px;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            overflow-y: scroll;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 10px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .me {
+            background: #dcf8c6;
+            align-self: flex-end;
+        }
+
+        .other {
+            background: #ffffff;
+            align-self: flex-start;
+        }
+
+        .system {
+            background: #d3d3d3;
+            align-self: center;
+            font-size: 12px;
+        }
+
+        #inputArea {
+            margin-top: 10px;
+        }
+
+        input {
+            padding: 10px;
+            width: 250px;
+            border-radius: 5px;
+            border: 1px solid gray;
+        }
+
+        button {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            background: #25d366;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Chat App</h2>
+
+<div id="chat"></div>
+
+<div id="inputArea">
+    <input id="message" placeholder="Type message..." />
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    let username = prompt("Enter username:");
+    let ws = new WebSocket("ws://localhost:8765");
+
+    let chat = document.getElementById("chat");
+
+    // When connection opens
+    ws.onopen = () => {
+        ws.send(username);
+    };
+
+    // When message received
+    ws.onmessage = (event) => {
+
+        console.log("Received:", event.data); // 🔍 DEBUG
+
+        let msgBox = document.createElement("div");
+        msgBox.classList.add("message");
+
+        // 👇 Detect type of message
+        if (event.data.includes(":")) {
+            let sender = event.data.split(":")[0].trim();
+
+            if (sender === username) {
+                msgBox.classList.add("me");   // your message
+            } else {
+                msgBox.classList.add("other"); // others
+            }
+        } else {
+            msgBox.classList.add("system"); // joined / left messages
+        }
+
+        msgBox.textContent = event.data;
+        chat.appendChild(msgBox);
+
+        // auto scroll
+        chat.scrollTop = chat.scrollHeight;
+    };
+
+    function sendMessage() {
+        let input = document.getElementById("message");
+
+        if (input.value.trim() === "") return;
+
+        ws.send(input.value);
+        input.value = "";
+    }
+
+    // 🔥 Press Enter to send
+    document.getElementById("message").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+            sendMessage();
+        }
+    });
+
+</script>
+
+</body>
+</html>
